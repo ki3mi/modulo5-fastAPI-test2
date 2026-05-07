@@ -10,6 +10,8 @@ class PrestamoSimularRequest(BaseModel):
     monto:       float = Field(gt=0, le=100000, description="Monto del prestamo en soles")
     plazo_meses: int   = Field(ge=6,  le=60,    description="Plazo en meses")
     tasa_anual:  float = Field(gt=0,  le=50,    description="Tasa de interes anual %")
+
+
 class PrestamoSolicitudRequest(BaseModel):
     """Datos necesarios para solicitar un prestamo (se guarda en BD)."""
     user_id:            UUID
@@ -27,9 +29,12 @@ class PrestamoSolicitudRequest(BaseModel):
 # --- ESQUEMA DE SALIDA (lo que devuelve la API) --
 class PrestamoSimularResponse(BaseModel):
     """Resultado de la simulacion que se envia al usuario."""
-    monto:         float
-    cuota_mensual: float
-    total_pagar:   float
-    total_interes: float
-    plazo_meses:   int
-    tasa_anual:    float
+    monto:              float  
+    tem_pct:            float          
+    cuota_mensual:      float   
+    total_intereses:    float  
+    itf:                float   # ← NUEVO campo obligatorio
+    importe_a_recibir:  float   # ← NUEVO: monto neto tras descontar ITF
+    total_a_pagar:      float
+    plazo_meses:        int     
+    tasa_anual:         float

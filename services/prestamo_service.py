@@ -6,24 +6,43 @@ from repositories.prestamo_repository import PrestamoRepository
 class PrestamoService:
     def __init__(self):
         self.repository = PrestamoRepository()
+        self.ITF_TASA = 0.00005  # 0.005% — TUO Ley N° 28194
+
     def calcular_cuota(self, monto: float, plazo: int, tasa_anual: float) -> dict:
-        """
-        Formula de amortizacion francesa:
-        C = P * [r(1+r)^n] / [(1+r)^n - 1]
-        Donde: P = monto, r = tasa mensual decimal, n = plazo en meses
-        """
-        r      = (tasa_anual / 100) / 12
-        factor = (1 + r) ** plazo
-        cuota  = monto * (r * factor) / (factor - 1)
-        total  = cuota * plazo
+        # """
+        # Formula de amortizacion francesa:
+        # C = P * [r(1+r)^n] / [(1+r)^n - 1]
+        # Donde: P = monto, r = tasa mensual decimal, n = plazo en meses
+        # """
+        # r      = (tasa_anual / 100) / 12
+        # factor = (1 + r) ** plazo
+        # cuota  = monto * (r * factor) / (factor - 1)
+        # total  = cuota * plazo
+        # return {
+        #     "monto":         round(monto, 2),
+        #     "cuota_mensual": round(cuota, 2),
+        #     "total_pagar":   round(total, 2),
+        #     "total_interes": round(total - monto, 2),
+        #     "plazo_meses":   plazo,
+        #     "tasa_anual":    tasa_anual
+        # }
+
+        tem   = (1 + tasa_anual / 100) ** (1 / 12) - 1 
+        cuota = monto * tem / (1 - (1 + tem) ** -plazo)
+        total = cuota * plazo
+        itf   = round(monto * self.ITF_TASA, 2) # ← NUEVO: ITF sobre monto desembolsado 
         return {
-            "monto":         round(monto, 2),
-            "cuota_mensual": round(cuota, 2),
-            "total_pagar":   round(total, 2),
-            "total_interes": round(total - monto, 2),
-            "plazo_meses":   plazo,
-            "tasa_anual":    tasa_anual
+            "monto":            round(monto, 2),           
+            "tem_pct":          round(tem * 100, 4),             
+            "cuota_mensual":    round(cuota, 2),          
+            "total_intereses":  round(total - monto, 2),
+            "itf":              itf,                     # ← NUEVO campo
+            "importe_a_recibir":round(monto - itf, 2),   # ← NUEVO: monto neto al cliente             
+            "total_a_pagar":    round(total, 2),  
+            "plazo_meses":      plazo,
+            "tasa_anual":       tasa_anual
         }
+
     async def guardar_solicitud(self, datos: dict) -> dict:
         """Calcula la cuota y delega la persistencia al Repository."""
         return self.repository.insertar_solicitud(datos)

@@ -1,0 +1,9 @@
+py -3.12 -m venv env
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+.\env\Scripts\activate
+
+pip3 freeze > requirements.txt
+pip3 install -r requirements.txt
+
+
+python -m uvicorn main:app --reload

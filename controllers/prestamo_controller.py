@@ -11,11 +11,13 @@ class PrestamoController:
         """Solo calcula la cuota, NO guarda en BD."""
         resultado = service.calcular_cuota(datos.monto, datos.plazo_meses, datos.tasa_anual)
         return {"success": True, "data": resultado}
+
     async def solicitar(self, datos: PrestamoSolicitudRequest) -> dict:
         """Calcula la cuota Y guarda la solicitud en Supabase."""
         calculo   = service.calcular_cuota(datos.monto, datos.plazo_meses, datos.tasa_anual)
         solicitud = await service.guardar_solicitud({**datos.dict(), **calculo})
         return {"success": True, "data": solicitud}
+        
     async def listar_solicitudes(self, user_id: str) -> dict:
         """Devuelve todas las solicitudes de un usuario."""
         solicitudes = service.obtener_solicitudes(user_id)
